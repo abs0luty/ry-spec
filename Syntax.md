@@ -45,8 +45,8 @@ This section contains information for implementing the lexing stage of compilati
 Identifiers name program entities such as variables, traits, types, etc. A "name" is a token, that starts with <a href="#id_start">id_start</a> and then continues with character that satisfies <a href="#id_continue">id_continue</a>. But: not every "name" token is an identifier. Identifier is a name token that is not one of the **reserved keywords**, which are listed below (see [Keywords section](#keywords)).
 
 <pre>
-<a>name</a> = <a href="#id_start">id_start</a> { <a href="#id_continue">id_continue</a> } . 
-<a>identifier</a> = /* every "name" except <a href="#keyword">keyword</a> */ . 
+<a id="name">name</a> = <a href="#id_start">id_start</a> { <a href="#id_continue">id_continue</a> } . 
+<a id="identifier">identifier</a> = /* every "name" except <a href="#keyword">keyword</a> */ . 
 </pre>
 
 Here are some examples of valid identifiers:
@@ -222,9 +222,55 @@ Here are some examples of string literals:
 
 # Syntax - Items
 
-TODO: everything.
-
-## Function item
+## Generics
 <pre>
-<a>FunctionItem</a> = [ "pub" ] "fun" <a href="#identifiers">identifier</a> [ <a>Generics</a> ] "(" <a>FunctionParameters</a> ")" [ ":" <a>Type</a> ] [ <a>WhereClause</a> ] ( ";" | <a>Block</a> ) .
+<a id="Generics">GenericParameters</a> = "[" [ <a href="#Generic">GenericParameter</a> { "," <a href="#Generic">GenericParameter</a> } [ "," ] ] "]" .
+<a id="Generic">GenericParameter</a> = <a href="#identifier">identifier</a> [ ":" <a class="#Type">Type</a> ] .
+<a id="GenericArguments">GenericArguments</a> = "[" [ <a href="#Type">Type</a> { "," <a href="#Type">Type</a> } [ "," ] ] "]" .
+</pre>
+
+## Where clause
+<pre>
+<a id="WhereClause">WhereClause</a> = "where" [ <a href="#WhereClauseItems">WhereClauseItems</a> ] .
+<a id="WhereClauseItems">WhereClauseItems</a> = <a href="#WhereClauseItem">WhereClauseItem</a> { "," <a href="#WhereClauseItem">WhereClauseItem</a> } [ "," ] .
+<a id="WhereClauseItem">WhereClauseItem</a> = <a href="#Type">Type</a> ":" <a href="#Type">Type</a> .
+</pre>
+
+## Function
+<pre>
+<a>Function</a> = [ "pub" ] "fun" <a href="#identifier">identifier</a> [ <a>GenericParameters</a> ] "(" [ <a>FunctionParameters</a> ] ")" [ ":" <a>Type</a> ] [ <a>WhereClause</a> ] ( ";" | <a>Block</a> ) .
+<a>FunctionParameters</a> = <a>FunctionParameter</a> { "," <a>FunctionParameter</a> } [ "," ] .
+<a>FunctionParameter</a> = <a href="#identifier">identifier</a> ":" <a href="#Type">Type</a> [ "=" <a href="#Expression">Expression</a> ] .
+</pre>
+
+## Struct
+<pre>
+<a>Struct</a> = [ "pub" ] "struct" <a href="#identifier">identifier</a> [ <a>GenericParameters</a> ] [ <a>WhereClause</a> ] "{" [ <a>StructFields</a> ] "}" .
+<a id="StructFields">StructFields</a> = <a href="#StructField">StructField</a> { "," <a href="#StructField">StructField</a> } [ "," ] .
+<a id="StructField">StructField</a> = [ "pub" ] <a href="#identifier">identifier</a> ":" <a>Type</a> .
+</pre>
+
+## Enum
+<pre>
+<a id="Enum">Enum</a> = [ "pub" ] "enum" <a href="#identifier">identifier</a> [ <a>GenericParameters</a> ] [ <a>WhereClause</a> ] "{" [ <a>EnumItems</a> ] "}" .
+<a id="EnumItems">EnumItems</a> = <a>EnumItem</a> { "," <a>EnumItem</a> } [ "," ] .
+<a id="EnumItem">EnumItem</a> = <a href="#identifier">identifier</a> ( <a href="#EnumItemStruct">EnumItemStruct</a> | <a href="#EnumItemTuple">EnumItemTuple</a> ) .
+<a id="EnumItemStruct">EnumItemStruct</a> = "{" [ <a href="#StructFields">StructFields</a> ] "}" .
+<a id="EnumItemTuple">EnumItemTuple</a> = "(" [ <a href="#TupleFields">TupleFields</a> ] ")" .
+<a id="TupleFields">TupleFields</a> = <a href="#TupleField">TupleField</a> { "," <a href="#TupleField">TupleField</a> } [ "," ] .
+<a id="TupleField">TupleField</a> = [ "pub" ] <a href="#Type">Type</a> .
+</pre>
+
+## Trait
+<pre>
+<a id="Trait">Trait</a> = [ "pub" ] "trait" <a href="#identifier">identifier</a>  [ <a>GenericParameters</a> ] [ <a>WhereClause</a> ] "{" [ <a>AssociatedFunctions</a> ] "}" .
+<a id="AssociatedFunctions">AssociatedFunctions</a> = <a id="AssociatedFunction">AssociatedFunction</a> { "," <a id="AssociatedFunction">AssociatedFunction</a> } [ "," ] .
+<a>AssociatedFunction</a> = <a>Function</a> .
+</pre>
+
+## Impl
+<pre>
+<a id="Impl">Impl</a> = "impl" [ <a>GenericParameters</a> ] <a>Type</a> [ "for" <a>Type</a> ] [ <a>WhereClause</a> ] "{" [ <a>AssociatedFunctions</a> ] "}" .
+<a id="AssociatedFunctions">AssociatedFunctions</a> = <a id="AssociatedFunction">AssociatedFunction</a> { "," <a id="AssociatedFunction">AssociatedFunction</a> } [ "," ] .
+<a>AssociatedFunction</a> = <a>Function</a> .
 </pre>
