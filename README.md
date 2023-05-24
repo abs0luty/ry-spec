@@ -1,5 +1,5 @@
 # The official Ry programming language specification.
-This repository contains the current specification for Ry programming language 0.0.1. If you are about to contribute
+This repository contains the current specification for Ry programming language 0.1. If you are about to contribute
 
 ## Contributing
 
