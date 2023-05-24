@@ -1,3 +1,5 @@
+# Ry 0.1 programming language specification - Syntax
+
 # Notation
 
 The syntax is specified using Wirth syntax notation (WSN) which is an alternative to BNF.
@@ -208,7 +210,7 @@ Here are some examples of valid and invalid character literals:
 String literals are character sequences between double quotes, as in`"foo"`. Within the quotes, any character may appear except newline and unescaped double quote. The text between the quotes forms the value of the literal, with backslash escapes interpreted as they are in character literals (except that `\'` is illegal and `\"` is legal), with the same restrictions. The two-digit hexadecimal (\x{nn}) escapes represent individual bytes of the resulting string; all other escapes represent the (possibly multi-byte) UTF-8 encoding of individual characters. Thus inside a string literal \x{FF} represents a single byte of value `0xFF`=`255`, while `ÿ`, `\u{00FF}`, `\U{000000FF}` and `\x{c3}\x{bf}` represent the two bytes `0xc3 0xbf` of the UTF-8 encoding of character `U+00FF`.
 
 <pre>
-<a>string_literal</a> = `"` { <a href="#character">character</a> } `"` .
+<a id="string_literal">string_literal</a> = `"` { <a href="#character">character</a> } `"` .
 </pre>
 
 Here are some examples of string literals:
@@ -222,55 +224,72 @@ Here are some examples of string literals:
 
 # Syntax - Items
 
-## Generics
 <pre>
 <a id="Generics">GenericParameters</a> = "[" [ <a href="#Generic">GenericParameter</a> { "," <a href="#Generic">GenericParameter</a> } [ "," ] ] "]" .
 <a id="Generic">GenericParameter</a> = <a href="#identifier">identifier</a> [ ":" <a class="#Type">Type</a> ] .
 <a id="GenericArguments">GenericArguments</a> = "[" [ <a href="#Type">Type</a> { "," <a href="#Type">Type</a> } [ "," ] ] "]" .
-</pre>
-
-## Where clause
-<pre>
 <a id="WhereClause">WhereClause</a> = "where" [ <a href="#WhereClauseItems">WhereClauseItems</a> ] .
 <a id="WhereClauseItems">WhereClauseItems</a> = <a href="#WhereClauseItem">WhereClauseItem</a> { "," <a href="#WhereClauseItem">WhereClauseItem</a> } [ "," ] .
 <a id="WhereClauseItem">WhereClauseItem</a> = <a href="#Type">Type</a> ":" <a href="#Type">Type</a> .
-</pre>
-
-## Function
-<pre>
-<a>Function</a> = [ "pub" ] "fun" <a href="#identifier">identifier</a> [ <a>GenericParameters</a> ] "(" [ <a>FunctionParameters</a> ] ")" [ ":" <a>Type</a> ] [ <a>WhereClause</a> ] ( ";" | <a>Block</a> ) .
-<a>FunctionParameters</a> = <a>FunctionParameter</a> { "," <a>FunctionParameter</a> } [ "," ] .
-<a>FunctionParameter</a> = <a href="#identifier">identifier</a> ":" <a href="#Type">Type</a> [ "=" <a href="#Expression">Expression</a> ] .
-</pre>
-
-## Struct
-<pre>
-<a>Struct</a> = [ "pub" ] "struct" <a href="#identifier">identifier</a> [ <a>GenericParameters</a> ] [ <a>WhereClause</a> ] "{" [ <a>StructFields</a> ] "}" .
+<a href="#Function">Function</a> = [ "pub" ] "fun" <a href="#identifier">identifier</a> [ <a href="#GenericParameters">GenericParameters</a> ] "(" [ <a href="#FunctionParameters">FunctionParameters</a> ] ")" [ ":" <a href="#Type">Type</a> ] [ <a href="#WhereClause">WhereClause</a> ] ( ";" | <a href="#Block">Block</a> ) .
+<a id="FunctionParameters">FunctionParameters</a> = <a>FunctionParameter</a> { "," <a>FunctionParameter</a> } [ "," ] .
+<a id="FunctionParameter">FunctionParameter</a> = <a href="#identifier">identifier</a> ":" <a href="#Type">Type</a> [ "=" <a href="#Expression">Expression</a> ] .
+<a id="Struct">Struct</a> = [ "pub" ] "struct" <a href="#identifier">identifier</a> [ <a>GenericParameters</a> ] [ <a href="#WhereClause">WhereClause</a> ] "{" [ <a>StructFields</a> ] "}" .
 <a id="StructFields">StructFields</a> = <a href="#StructField">StructField</a> { "," <a href="#StructField">StructField</a> } [ "," ] .
 <a id="StructField">StructField</a> = [ "pub" ] <a href="#identifier">identifier</a> ":" <a>Type</a> .
-</pre>
-
-## Enum
-<pre>
-<a id="Enum">Enum</a> = [ "pub" ] "enum" <a href="#identifier">identifier</a> [ <a>GenericParameters</a> ] [ <a>WhereClause</a> ] "{" [ <a>EnumItems</a> ] "}" .
+<a id="Enum">Enum</a> = [ "pub" ] "enum" <a href="#identifier">identifier</a> [ <a>GenericParameters</a> ] [ <a href="#WhereClause">WhereClause</a> ] "{" [ <a>EnumItems</a> ] "}" .
 <a id="EnumItems">EnumItems</a> = <a>EnumItem</a> { "," <a>EnumItem</a> } [ "," ] .
-<a id="EnumItem">EnumItem</a> = <a href="#identifier">identifier</a> ( <a href="#EnumItemStruct">EnumItemStruct</a> | <a href="#EnumItemTuple">EnumItemTuple</a> ) .
+<a id="EnumItem">EnumItem</a> = <a href="#identifier">identifier</a> [ <a href="#EnumItemStruct">EnumItemStruct</a> | <a href="#EnumItemTuple">EnumItemTuple</a> ] .
 <a id="EnumItemStruct">EnumItemStruct</a> = "{" [ <a href="#StructFields">StructFields</a> ] "}" .
 <a id="EnumItemTuple">EnumItemTuple</a> = "(" [ <a href="#TupleFields">TupleFields</a> ] ")" .
 <a id="TupleFields">TupleFields</a> = <a href="#TupleField">TupleField</a> { "," <a href="#TupleField">TupleField</a> } [ "," ] .
 <a id="TupleField">TupleField</a> = [ "pub" ] <a href="#Type">Type</a> .
-</pre>
-
-## Trait
-<pre>
 <a id="Trait">Trait</a> = [ "pub" ] "trait" <a href="#identifier">identifier</a>  [ <a>GenericParameters</a> ] [ <a>WhereClause</a> ] "{" [ <a>AssociatedFunctions</a> ] "}" .
 <a id="AssociatedFunctions">AssociatedFunctions</a> = <a id="AssociatedFunction">AssociatedFunction</a> { "," <a id="AssociatedFunction">AssociatedFunction</a> } [ "," ] .
 <a>AssociatedFunction</a> = <a>Function</a> .
-</pre>
-
-## Impl
-<pre>
 <a id="Impl">Impl</a> = "impl" [ <a>GenericParameters</a> ] <a>Type</a> [ "for" <a>Type</a> ] [ <a>WhereClause</a> ] "{" [ <a>AssociatedFunctions</a> ] "}" .
-<a id="AssociatedFunctions">AssociatedFunctions</a> = <a id="AssociatedFunction">AssociatedFunction</a> { "," <a id="AssociatedFunction">AssociatedFunction</a> } [ "," ] .
-<a>AssociatedFunction</a> = <a>Function</a> .
+<a id="Path">Path</a> = <a href="#identifier">identifier</a> { "." <a href="#identifier">identifier</a> } .
+<a id="Import">Import</a> = "import" <a href="#Path">Path</a> ";" .
+<a id="Type">Type</a> = <a href="#PrimaryType">PrimaryType</a> | <a href="#ArrayType">ArrayType</a> .
+<a id="PrimaryType">PrimaryType</a> = <a href="#Path">Path</a> [ <a>GenericParameters</a> ] .
+<a id="ArrayType">ArrayType</a> = "[" <a href="#Type">Type</a> "]" .
+<a id="Pattern">Pattern</a> = <a href="#LiteralPattern">LiteralPattern</a> | <a href="#IdentifierPattern">IdentifierPattern</a> | <a href="#StructPattern">StructPattern</a> | <a href="#EnumEnumItemTuplePattern">EnumItemTuplePattern</a> | <a href="#PathPattern">PathPattern</a> | <a href="#ArrayPattern">ArrayPattern</a> | <a href="#RestPattern">RestPattern</a> .
+<a id="Literal">Literal</a> = "true" | "false" | <a href="#character_literal">character_literal</a> | <a href="#integer_literal">integer_literal</a> | <a href="#float_literal">float_literal</a> | <a href="#string_literal">string_literal</a> .
+<a id="LiteralPattern">LiteralPattern</a> = <a href="#Literal">Literal</a> .
+<a id="IdentifierPattern">IdentifierPattern</a> = <a href="#identifier">identifier</a> [ "@" <a href="#Pattern">Pattern</a> ] .
+<a id="StructPattern">StructPattern</a> = <a href="#Path">Path</a> "{" [ <a href="#StructPatternFields">StructPatternFields</a> ] "}" .
+<a id="StructPatternFields">StructPatternFields</a> = <a href="#StructPatternField">StructPatternField</a> { "," <a href="#StructPatternField">StructPatternField</a> } [ "," ] .
+<a id="StructPatternField">StructPatternField</a> = <a href="#identifier">identifier</a> [ ":" <a href="#Pattern">Pattern</a> ] .
+<a id="EnumItemTuplePattern">EnumItemTuplePattern</a> = <a href="#Path">Path</a> "(" [ <a href="#Pattern">Pattern</a> { "," <a href="#Pattern">Pattern</a> } [ "," ] ] ")" .
+<a id="PathPattern">PathPattern</a> = <a href="#Path">Path</a> .
+<a id="ArrayPattern">ArrayPattern</a> = "[" [ <a href="#Pattern">Pattern</a> { "," <a href="#Pattern">Pattern</a> } [ "," ] ] "]" .
+<a id="RestPattern">RestPattern</a> = ".." .
+<a id="Block">Block</a> = "{" <a href="#StatementsList">StatementsList</a> "}" .
+<a id="StatementsList">StatementsList</a> = [ <a href="#Statement">Statement</a> { "," <a href="#Statement">Statement</a> } [ "," ] ] [ <a href="#Expression">Expression</a> ] . 
+<a id="Statement">Statement</a> = <a href="#ReturnStatement">ReturnStatement</a> | <a href="#ExpressionStatement">ExpressionStatement</a> .
+<a id="ExpressionStatement">ExpressionStatement</a> = <a href="#ExpressionWithBlock">ExpressionWithBlock</a> [ ";" ] | <a href="#ExpressionWithoutBlock">ExpressionWithoutBlock</a> ";" .
+<a id="Expression">Expression</a> = <a href="#ExpressionWithBlock">ExpressionWithBlock</a> | <a href="#ExpressionWithoutBlock">ExpressionWithoutBlock</a> .  
+<a id="ExpressionWithBlock">ExpressionWithBlock</a> = <a href="#Block">Block</a> | <a href="#IfExpression">IfExpression</a> | <a href="#WhileExpression">WhileExpression</a> | <a href="#ForExpression">ForExpression</a> | <a href="#MatchExpression">MatchExpression</a> .
+<a id="ExpressionWithoutBlock">ExpressionWithoutBlock</a> = <a href="#AsExpression">AsExpression</a> | <a href="#ArrayExpression">ArrayExpression</a> | <a href="#BinaryOperatorExpression">BinaryOperatorExpression</a> | <a href="#PrefixOperatorExpression">PrefixOperatorExpression</a> | <a href="#PostfixOperatorExpression">PostfixOperatorExpression</a> | <a href="#CallExpression">CallExpression</a> | <a href="#StructInitExpression">StructInitExpression</a> | <a href="#EnumTupleItemInitExpression">EnumTupleItemInitExpression</a> | <a href="#Path">Path</a> | <a href="#Literal">Literal</a> | "(" <a href="#Expression">Expression</a> ")" .
+<a id="AsExpression">AsExpression</a> = <a href="#Expression">Expression</a> "as" <a href="#Type">Type</a> .
+<a id="IfExpression">IfExpression</a> = "if" <a href="#Expression">Expression</a> <a href="#Block">Block</a> { "else" "if" <a href="#Expression">Expression</a> <a href="#Block">Block</a> } [ "else" <a href="#Block">Block</a> ] .
+<a id="WhileExpression">WhileExpression</a> = "while" <a href="#Expression">Expression</a> <a href="#Block">Block</a> .
+<a id="ForExpression">ForExpression</a> = "for" <a href="#Pattern">Pattern</a> "in" <a href="#Expression">Expression</a> <a href="#Block">Block</a> .
+<a id="MatchExpression">MatchExpression</a> = "match" <a href="#Expression">Expression</a> <a href="#MatchBlock">MatchBlock</a> .
+<a id="MatchBlock">MatchBlock</a> = "{" [ <a href="#MatchItem">MatchItem</a> { "," <a href="#MatchItem">MatchItem</a> } [ "," ] ] "}" .
+<a id="MatchItem">MatchItem</a> = <a href="#Pattern">Pattern</a> "=>" <a href="#Expression">Expression</a> .
+<a id="BinaryOperatorExpression">BinaryOperatorExpression</a> = <a href="#Expression">Expression</a> <a href="#BinaryOperator">BinaryOperator</a> <a href="#Expression">Expression</a> .
+<a id="PrefixOperatorExpression">PrefixOperatorExpression</a> = <a href="#PrefixOperator">PrefixOperator</a> <a href="#Expression">Expression</a> .
+<a id="PostfixOperatorExpression">PostfixOperatorExpression</a> = <a href="#Expression">Expression</a> <a href="#PostfixOperator">PostfixOperator</a> .
+<a id="CallExpression">CallExpression</a> = <a href="#Expression">Expression</a> <a href="#CallArguments">CallArguments</a> .
+<a id="CallArguments">CallArguments</a> = "(" <a href="#ExpressionList">ExpressionList</a> ")" .
+<a id="ExpressionList">ExpressionList</a> = [ <a href="#Expression">Expression</a> { "," <a href="#Expression">Expression</a> } [ "," ] ] .
+<a id="StructInitExpression">StructInitExpression</a> = <a href="#Path">Path</a> "{" <a href="#StructFieldsExpression">StructFieldsExpression</a> "}" .
+<a id="StructFieldsExpression">StructFieldsExpression</a> = [ <a href="#StructFieldExpression">StructFieldExpression</a> { "," <a href="#StructFieldExpression">StructFieldExpression</a> } [ "," ] ] .
+<a id="StructFieldExpression">StructFieldExpression</a> = <a href="#identifier">identifier</a> [ ":" <a href="#Expression">Expression</a> ] .
+<a id="EnumTupleItemInitExpression">EnumTupleItemInitExpression</a> = <a href="#Path">Path</a> "(" <a href="#ExpressionList">ExpressionList</a> ")" .
+<a id="ArrayExpression">ArrayExpression</a> = "[" <a href="#ExpressionList">ExpressionList</a> "]" .
+<a id="BinaryOperator">BinaryOperator</a> = "+" | "-" | "*" | "/" | ">" | ">=" | "<" | "<=" | "=" | "==" | "!=" | ">>" | "<<" | "|" | "&" | "^" | "||" | "&&" | "+=" | "-=" | "*=" | "/=" | "^=" | "|=" | "." | "%" | "**" .
+<a id="PrefixOperator">PrefixOperator</a> = "++" | "--" | "!" | "~" | "-" | "+" .
+<a id="PostfixOperator">PostfixOperator</a> = "++" | "--" | "?" .
 </pre>
